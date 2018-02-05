@@ -8,16 +8,19 @@ package view;
 import Connect.DBManager;
 import Controler.Account;
 import Model_Object.City;
+import Model_Object.Discount;
 import Model_Object.Person;
 import Model_Object.UserCompany;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -90,6 +93,13 @@ public class App extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        cbValid = new javax.swing.JComboBox<>();
+        cbActive = new javax.swing.JRadioButton();
+        cbInactive = new javax.swing.JRadioButton();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tabDiscount = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -246,15 +256,86 @@ public class App extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("My Order", jPanel1);
 
+        jLabel11.setText("Type of discount");
+
+        cbValid.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-", "Valid", "Invalid" }));
+
+        cbActive.setSelected(true);
+        cbActive.setText("Active");
+        cbActive.setName("cbActive"); // NOI18N
+        cbActive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbActiveActionPerformed(evt);
+            }
+        });
+
+        cbInactive.setText("Inactive");
+        cbInactive.setName("cbInactive"); // NOI18N
+        cbInactive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbInactiveActionPerformed(evt);
+            }
+        });
+
+        jButton1.setText("Show discount");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        tabDiscount.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(tabDiscount);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1193, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(134, 134, 134)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cbValid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(73, 73, 73)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbInactive)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(cbActive)
+                                .addGap(51, 51, 51)
+                                .addComponent(jButton1))))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(103, 103, 103)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 779, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(311, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 714, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(cbActive)
+                    .addComponent(cbValid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbInactive)
+                .addGap(46, 46, 46)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(420, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("My discount", jPanel4);
@@ -267,7 +348,7 @@ public class App extends javax.swing.JFrame {
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 714, Short.MAX_VALUE)
+            .addGap(0, 722, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("Shop", jPanel3);
@@ -285,6 +366,59 @@ public class App extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cbActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbActiveActionPerformed
+        if(cbActive.isSelected())
+        {
+        cbInactive.setSelected(false);
+        }
+    }//GEN-LAST:event_cbActiveActionPerformed
+
+    private void cbInactiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbInactiveActionPerformed
+            if(cbInactive.isSelected())
+        {
+        cbActive.setSelected(false);
+        }
+    }//GEN-LAST:event_cbInactiveActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+      /*Discount dis = new Discount(HEIGHT, WIDTH, PROPERTIES, PROPERTIES, describe)
+        String email = User.getEmailLog();
+        Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+
+              String valid = String.valueOf(cbValid.getSelectedItem());
+              int loguser = 
+                String wagonType = String.valueOf(jComboBoxWagonTypeFind.getSelectedItem());
+
+                String company = String.valueOf(jComboBoxCopanyNameFind.getSelectedItem());
+
+                List<WagonOnStation> wagons = DataManager.getWagonsOnStation(stationId, wagonType, company);
+
+                if (wagons.size() == 0) {
+                    wagons = DataManager.getNearestWagonsOnRalsStation(stationId, wagonType, company);
+                }
+
+                Object[][] o = new Object[wagons.size()][5];
+
+                for (WagonOnStation wagon : wagons) {
+                    o[i][0] = wagon.getIdStation();
+                    o[i][1] = wagon.getIdWagon();
+                    o[i][2] = wagon.getType();
+                    o[i][3] = wagon.getCompany();
+                    o[i][4] = wagon.getIdScanner();
+                    i++;
+                }
+
+                DefaultTableModel d = new DefaultTableModel(o, new Object[]{"Stanica", "Id vozňa", "Typ vozňa", "Spoločnosť", "Id snimaču koľaje"});
+                jTableWagons.setModel(d);
+            
+            }
+        });
+        t1.start();
+*/
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -322,8 +456,13 @@ public class App extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton cbActive;
+    private javax.swing.JRadioButton cbInactive;
+    private javax.swing.JComboBox<String> cbValid;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -346,6 +485,8 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable tabDiscount;
     // End of variables declaration//GEN-END:variables
 }
