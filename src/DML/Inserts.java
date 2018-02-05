@@ -44,6 +44,7 @@ public class Inserts {
                 + addApostrofs(userComp.getHashPassw()) + ","
                 + addApostrofs(userComp.getRC()) + ",null)";
                    System.out.println(query);
+
         DbManager.insertSql(query);
     }
     

@@ -30,6 +30,7 @@ public class DBManager {
             //STEP 3: Open a connection
             System.out.println("Connecting to a selected database...");
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/sprava_cien_project?sprava_cien_project?useSSL=false", "root", "tominok");
+
             System.out.println("Connected database successfully...");
         } catch (Exception e) {
             //Handle errors for Class.forName
