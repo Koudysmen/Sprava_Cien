@@ -21,7 +21,7 @@ public class Company {
         this.nameOfCompany = nameOfCompany;
         this.email = email;
     }
-//kl
+//klj
     public String getICO() {
         return ICO;
     }
