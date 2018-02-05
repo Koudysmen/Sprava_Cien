@@ -84,7 +84,7 @@ public class Account {
     
     public String getNameOfCompany(String ICO) {
         String result = null;
-        if(ICO != null){
+        
         String query = "SELECT"
                 + "  nazov"
                 + " FROM"
@@ -106,7 +106,7 @@ public class Account {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        }
+        
 
         return result;
     }

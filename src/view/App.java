@@ -51,7 +51,9 @@ public class App extends javax.swing.JFrame {
         jLabelAccountEmailStreet.setText(City.getStreet());
         jLabelAccountPSC.setText(Person.getPSC());
         jLabelAccountIco.setText(User.getICO());
+        if(User.getICO()!=null){
         jLabelNameOfComp.setText(Account.getNameOfCompany(User.getICO())); 
+        }
     }
 
 
