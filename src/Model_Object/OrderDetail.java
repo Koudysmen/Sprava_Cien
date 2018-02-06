@@ -10,14 +10,14 @@ package Model_Object;
  * @author Michal
  */
 public class OrderDetail {
-   private String IdItem;
+   private int IdItem;
    private double Price;
    private String NameOfItem;
    private String Brand;
    private double Ks;
-   private String Discount;
+   private int Discount;
 
-    public OrderDetail(String IdItem, double Price, String NameOfItem, String Brand, double Ks, String Discount) {
+    public OrderDetail(int IdItem, double Price, String NameOfItem, String Brand, double Ks, int Discount) {
         this.IdItem = IdItem;
         this.Price = Price;
         this.NameOfItem = NameOfItem;
@@ -26,7 +26,7 @@ public class OrderDetail {
         this.Discount = Discount;
     }
 
-    public String getIdItem() {
+    public int getIdItem() {
         return IdItem;
     }
 
@@ -46,11 +46,11 @@ public class OrderDetail {
         return Ks;
     }
 
-    public String getDiscount() {
+    public int getDiscount() {
         return Discount;
     }
 
-    public void setIdItem(String IdItem) {
+    public void setIdItem(int IdItem) {
         this.IdItem = IdItem;
     }
 
@@ -70,7 +70,7 @@ public class OrderDetail {
         this.Ks = Ks;
     }
 
-    public void setDiscount(String Discount) {
+    public void setDiscount(int Discount) {
         this.Discount = Discount;
     }
    

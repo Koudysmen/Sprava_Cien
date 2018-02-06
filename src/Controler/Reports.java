@@ -8,6 +8,7 @@ package Controler;
 import Connect.DBManager;
 import Model_Object.AccountMyOrder;
 import Model_Object.Discount;
+import Model_Object.OrderDetail;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -96,6 +97,97 @@ public class Reports {
 
         return result;
     }
+    
+     public double getOrderPrice(int idOrder) {
+         double result = 0;
+         String query = "SELECT"
+                + " sum(cena*mnozstvo) as Price"
+                + " from Polozka "
+                + " where id_objednavky = " + idOrder;
+
+       ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                rs.next();
+                //Retrieve by column name
+                result = rs.getDouble("Price");
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+     
+     public Date getOrderDate(int idOrder) {
+         Date result = null; 
+         String query = "SELECT"
+                + " dat_objednavky"
+                + " from Objednavka "
+                + " where id_objednavky = " + idOrder;
+
+       ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                rs.next();
+                //Retrieve by column name
+                result = rs.getDate("dat_objednavky");
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    
+    public List<OrderDetail> getOrderDetail(int IdOrder) {
+       String query = "SELECT p.id_predmetu,"
+                + " p.cena as Price,"
+                + " p.mnozstvo as mnozstvo,"
+                + " p.id_zlavy as zlava,"
+                + " pp.znacka as znacka,"
+                + " pp.nazov nazov_predm"
+                + " from Polozka p"
+                + " join Predmet_predaja pp using(id_predmetu)"
+                + " join Kategorie using (id_kategorie)"
+                + " where p.id_objednavky = " + IdOrder;
+                
+
+        List<OrderDetail> result = new ArrayList<>();
+        ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    int IdOrderInput = rs.getInt("id_predmetu");
+                    String belt = rs.getString("znacka");
+                    String nameOfItem = rs.getString("nazov_predm");
+                    int idDiscout = rs.getInt("zlava");
+                    double Price = rs.getDouble("Price");
+                    double ks = rs.getDouble("mnozstvo");
+                    OrderDetail ordDetail = new OrderDetail(IdOrderInput, Price, nameOfItem, belt, ks, idDiscout);
+                    result.add(ordDetail);
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    
     
     
     public ArrayList<Discount> getAktivValidDiscount(int userId)
@@ -291,7 +383,31 @@ public class Reports {
         return result;
     }
     
+    public ArrayList<String> getIdOrder(String Email) {
+         ArrayList<String> result = new ArrayList<>();
+         ResultSet rs = DbManager.querySQL( "SELECT"
+                + " id_objednavky"
+                + " FROM"
+                + " Objednavka o"
+                + " join Registrovany_uzivatel ru on(ru.id_uzivatela = o.kupujuci)"
+                + " WHERE ru.email like " + addApostrofs(Email));
 
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    result.add(rs.getString("id_objednavky"));
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+        
     private String addApostrofs(String name) {
         return "'" + name + "'";
     }
