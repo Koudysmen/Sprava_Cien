@@ -234,7 +234,22 @@ public class Reports {
          return discounts;
     }
     
-    
+       public String getNameOfTypeDiscount(int idType) throws SQLException
+       {
+           String nazov = "";
+           String query = "SELECT nazov_typu FROM typ_zlavy WHERE id_typu ="+idType;
+           ResultSet rs = DbManager.querySQL(query);
+            try {
+           if (rs != null) {
+                while (rs.next()) {
+                    nazov = rs.getString("nazov_typu");
+                  }
+                rs.close();
+            }
+           } catch (SQLException e) {
+        }
+           return nazov;
+       }
     
     
         public int getUserId(String email)
@@ -252,7 +267,7 @@ public class Reports {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-           System.out.println("Id uzivatela je ="+userId);
+          
            return userId;
         }
     

@@ -638,9 +638,21 @@ public class App extends javax.swing.JFrame {
                 for(Discount d : discounts)
                 {
                 o[i][0] = d.getId_discnt();
-                o[i][1] = d.getId_type();
-                o[i][2] = d.getId_price_discnt();
-                o[i][3] = d.getId_per_discnt();
+                   
+                    try {
+               o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                   
+                if(d.getId_price_discnt()==0)
+                {o[i][2] = "";}    
+                else
+                {o[i][2] = d.getId_price_discnt();}   
+                if(d.getId_per_discnt()==0)
+                {o[i][3]="";}
+                else
+                {o[i][3] = d.getId_per_discnt();}
                 o[i][4] = d.getDescribe();
                 o[i][5] = d.getActive();
                 o[i][6] = Formater.format(d.getDat_from());
@@ -648,7 +660,7 @@ public class App extends javax.swing.JFrame {
                 {o[i][7] = Formater.format(d.getDat_to());}
                 i++;
                 }
-                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
+                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " Type of Discount" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
                 tabDiscount.setModel(t);
                 
                 }
@@ -665,9 +677,19 @@ public class App extends javax.swing.JFrame {
                 for(Discount d : discounts)
                 {
                 o[i][0] = d.getId_discnt();
-                o[i][1] = d.getId_type();
-                o[i][2] = d.getId_price_discnt();
-                o[i][3] = d.getId_per_discnt();
+                    try {
+                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                if(d.getId_price_discnt()==0)
+                {o[i][2] = "";}    
+                else
+                {o[i][2] = d.getId_price_discnt();}   
+                if(d.getId_per_discnt()==0)
+                {o[i][3]="";}
+                else
+                {o[i][3] = d.getId_per_discnt();}
                 o[i][4] = d.getDescribe();
                 o[i][5] = d.getActive();
                 o[i][6] = Formater.format(d.getDat_from());
@@ -704,9 +726,19 @@ public class App extends javax.swing.JFrame {
                 for(Discount d : discounts)
                 {
                 o[i][0] = d.getId_discnt();
-                o[i][1] = d.getId_type();
-                o[i][2] = d.getId_price_discnt();
-                o[i][3] = d.getId_per_discnt();
+                    try {
+                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                if(d.getId_price_discnt()==0)
+                {o[i][2] = "";}    
+                else
+                {o[i][2] = d.getId_price_discnt();}   
+                if(d.getId_per_discnt()==0)
+                {o[i][3]="";}
+                else
+                {o[i][3] = d.getId_per_discnt();}
                 o[i][4] = d.getDescribe();
                 o[i][5] = d.getActive();
                 o[i][6] = Formater.format(d.getDat_from());
@@ -733,9 +765,19 @@ public class App extends javax.swing.JFrame {
                 for(Discount d : discounts)
                 {
                 o[i][0] = d.getId_discnt();
-                o[i][1] = d.getId_type();
-                o[i][2] = d.getId_price_discnt();
-                o[i][3] = d.getId_per_discnt();
+                    try {
+                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                if(d.getId_price_discnt()==0)
+                {o[i][2] = "";}    
+                else
+                {o[i][2] = d.getId_price_discnt();}   
+                if(d.getId_per_discnt()==0)
+                {o[i][3]="";}
+                else
+                {o[i][3] = d.getId_per_discnt();}
                 o[i][4] = d.getDescribe();
                 o[i][5] = d.getActive();
                 o[i][6] = Formater.format(d.getDat_from());
