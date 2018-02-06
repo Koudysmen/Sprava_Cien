@@ -20,11 +20,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -38,6 +40,7 @@ public class App extends javax.swing.JFrame {
     private static City City;
     private Account Account;
     private Reports Report;
+    
     SimpleDateFormat Formater = new SimpleDateFormat("dd.MM.yyyy");
     /**
      * Creates new form App
@@ -618,42 +621,140 @@ public class App extends javax.swing.JFrame {
     }//GEN-LAST:event_cbInactiveActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-      /*Discount dis = new Discount(HEIGHT, WIDTH, PROPERTIES, PROPERTIES, describe)
-        String email = User.getEmailLog();
-        Thread t1 = new Thread(new Runnable() {
+         tabDiscount.removeAll();
+         String email = User.getEmailLog();
+         int user_id = Report.getUserId(email);
+         String valid = String.valueOf(cbValid.getSelectedItem());
+         // Active discounts
+        if(cbActive.isSelected()) {
+            // Active - valid discounts
+            if(valid.trim().equals("Valid"))
+            {  
+                  Thread t1 = new Thread(new Runnable() {
             public void run() {
                 int i = 0;
-
-              String valid = String.valueOf(cbValid.getSelectedItem());
-              int loguser = 
-                String wagonType = String.valueOf(jComboBoxWagonTypeFind.getSelectedItem());
-
-                String company = String.valueOf(jComboBoxCopanyNameFind.getSelectedItem());
-
-                List<WagonOnStation> wagons = DataManager.getWagonsOnStation(stationId, wagonType, company);
-
-                if (wagons.size() == 0) {
-                    wagons = DataManager.getNearestWagonsOnRalsStation(stationId, wagonType, company);
+                ArrayList<Discount> discounts = Report.getAktivValidDiscount(user_id);
+                Object [][] o = new Object[discounts.size()][8];
+                for(Discount d : discounts)
+                {
+                o[i][0] = d.getId_discnt();
+                o[i][1] = d.getId_type();
+                o[i][2] = d.getId_price_discnt();
+                o[i][3] = d.getId_per_discnt();
+                o[i][4] = d.getDescribe();
+                o[i][5] = d.getActive();
+                o[i][6] = Formater.format(d.getDat_from());
+                if(d.getDat_to()!=null)
+                {o[i][7] = Formater.format(d.getDat_to());}
+                i++;
                 }
-
-                Object[][] o = new Object[wagons.size()][5];
-
-                for (WagonOnStation wagon : wagons) {
-                    o[i][0] = wagon.getIdStation();
-                    o[i][1] = wagon.getIdWagon();
-                    o[i][2] = wagon.getType();
-                    o[i][3] = wagon.getCompany();
-                    o[i][4] = wagon.getIdScanner();
-                    i++;
+                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
+                tabDiscount.setModel(t);
+                
                 }
-
-                DefaultTableModel d = new DefaultTableModel(o, new Object[]{"Stanica", "Id vozňa", "Typ vozňa", "Spoločnosť", "Id snimaču koľaje"});
-                jTableWagons.setModel(d);
-            
+            });
+        t1.start(); 
+            } // active invalid discounts
+            else if(valid.trim().equals("Invalid"))
+            {
+             Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+                ArrayList<Discount> discounts = Report.getAktivInvalidDiscount(user_id);
+                Object [][] o = new Object[discounts.size()][8];
+                for(Discount d : discounts)
+                {
+                o[i][0] = d.getId_discnt();
+                o[i][1] = d.getId_type();
+                o[i][2] = d.getId_price_discnt();
+                o[i][3] = d.getId_per_discnt();
+                o[i][4] = d.getDescribe();
+                o[i][5] = d.getActive();
+                o[i][6] = Formater.format(d.getDat_from());
+                if(d.getDat_to()!=null)
+                {o[i][7] = Formater.format(d.getDat_to());}
+                i++;
+                }
+                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
+                tabDiscount.setModel(t);
+                
+                }
+            });
+        t1.start(); 
             }
-        });
-        t1.start();
-*/
+       
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Please choose validation type","Warning",JOptionPane.WARNING_MESSAGE);
+            }
+       
+        }
+        // Inactive discounts
+        else
+        {
+                //inactive valid discount
+              if(valid.trim().equals("Valid"))
+              {
+              
+             Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+                ArrayList<Discount> discounts = Report.getInaktivValidDiscount(user_id);
+                Object [][] o = new Object[discounts.size()][8];
+                for(Discount d : discounts)
+                {
+                o[i][0] = d.getId_discnt();
+                o[i][1] = d.getId_type();
+                o[i][2] = d.getId_price_discnt();
+                o[i][3] = d.getId_per_discnt();
+                o[i][4] = d.getDescribe();
+                o[i][5] = d.getActive();
+                o[i][6] = Formater.format(d.getDat_from());
+                if(d.getDat_to()!=null)
+                {o[i][7] = Formater.format(d.getDat_to());}
+                i++;
+                }
+                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
+                tabDiscount.setModel(t);
+                
+                }
+            });
+        t1.start(); 
+              }
+              // inactive invalid discounts
+             else if(valid.trim().equals("Invalid"))
+              {
+              
+             Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+                ArrayList<Discount> discounts = Report.getInaktivInvalidDiscount(user_id);
+                Object [][] o = new Object[discounts.size()][8];
+                for(Discount d : discounts)
+                {
+                o[i][0] = d.getId_discnt();
+                o[i][1] = d.getId_type();
+                o[i][2] = d.getId_price_discnt();
+                o[i][3] = d.getId_per_discnt();
+                o[i][4] = d.getDescribe();
+                o[i][5] = d.getActive();
+                o[i][6] = Formater.format(d.getDat_from());
+                if(d.getDat_to()!=null)
+                {o[i][7] = Formater.format(d.getDat_to());}
+                i++;
+                }
+                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
+                tabDiscount.setModel(t);
+                
+                }
+            });
+        t1.start(); 
+              }
+             else
+            {
+                JOptionPane.showMessageDialog(null, "Please choose validation type","Warning",JOptionPane.WARNING_MESSAGE);
+            }
+        }    
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed

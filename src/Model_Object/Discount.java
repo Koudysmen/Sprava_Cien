@@ -5,6 +5,8 @@
  */
 package Model_Object;
 
+import java.util.Date;
+
 /**
  *
  * @author tomas
@@ -15,14 +17,32 @@ public class Discount {
     private int id_price_discnt;
     private int id_per_discnt;
     private String describe;
+    private String active;
+    private Date dat_from;
+    private Date dat_to;
 
-    public Discount(int id_discnt, int id_type, int id_price_discnt, int id_per_discnt, String describe) {
+    public Discount(int id_discnt, int id_type, int id_price_discnt, int id_per_discnt, String describe, String active, Date dat_from, Date dat_to) {
         this.id_discnt = id_discnt;
         this.id_type = id_type;
         this.id_price_discnt = id_price_discnt;
         this.id_per_discnt = id_per_discnt;
         this.describe = describe;
+        this.active = active;
+        this.dat_from = dat_from;
+        this.dat_to = dat_to;
     }
+
+    
+
+    public String getActive() {
+        return active;
+    }
+
+    public void setActive(String active) {
+        this.active = active;
+    }
+
+  
 
     public String getDescribe() {
         return describe;
@@ -64,6 +84,23 @@ public class Discount {
         this.id_type = id_type;
     }
 
+    public Date getDat_from() {
+        return dat_from;
+    }
+
+    public Date getDat_to() {
+        return dat_to;
+    }
+
+    public void setDat_from(Date dat_from) {
+        this.dat_from = dat_from;
+    }
+
+    public void setDat_to(Date dat_to) {
+        this.dat_to = dat_to;
+    }
+
+    
     @Override
     public String toString() {
         return super.toString(); //To change body of generated methods, choose Tools | Templates.
