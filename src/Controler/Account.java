@@ -6,6 +6,7 @@
 package Controler;
 
 import Connect.DBManager;
+import Model_Object.AccountMyOrder;
 import Model_Object.City;
 import Model_Object.Person;
 import Model_Object.UserCompany;
@@ -14,6 +15,9 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -106,12 +110,44 @@ public class Account {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+      return result;
+    }
+    
+    
+    
+     public String getNationaly(String PSC) {
+        String result = null;
+        String query = "SELECT"
+                + " kra.nazov nazov"
+                + " FROM"
+                + " Krajina kra"
+                + " join Kraj using(id_krajiny)"
+                + " join Okres using(id_kraja)"
+                + " join Mesto using(id_okresu)"
+                + " WHERE Mesto.PSC like " + addApostrofs(PSC);
+
+        ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                while (rs.next()) {
+                    //Retrieve by column name
+                    result = rs.getString("nazov");
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
 
         return result;
     }
 
 
+ 
     
     public static String hashPassword(String passwordToHash) {
         String generatedPassword = null;
@@ -138,6 +174,10 @@ public class Account {
     
     private String addApostrofs(String name) {
         return "'" + name + "'";
+    }
+    
+    public boolean isNullOrEmpty(String term) {
+        return term == null || term.equals("") || term.equals("null");
     }
     
     public UserCompany getUser() {

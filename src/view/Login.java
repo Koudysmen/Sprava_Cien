@@ -62,7 +62,7 @@ public class Login extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel3.setText("password: ");
 
-        jtxtEmailLogin.setText("fridman@gmail.com");
+        jtxtEmailLogin.setText("aaa@sk");
 
         jPasswordField1.setText("aaa");
 
