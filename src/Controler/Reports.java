@@ -9,6 +9,7 @@ import Connect.DBManager;
 import Model_Object.AccountMyOrder;
 import Model_Object.Discount;
 import Model_Object.OrderDetail;
+import Model_Object.Product;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -187,6 +188,48 @@ public class Reports {
         return result;
     }
     
+    public List<Product> getProduct(String brand,String category , double maxPrice) {
+        if (!isNullOrEmpty(brand)) {
+            brand = " AND p.znacka like " + addApostrofs(brand);
+        }
+        if (!isNullOrEmpty(category)) {
+            category = " AND k.nazov like " + addApostrofs(category);
+        }
+      
+        
+        String query = "SELECT p.nazov as nazov_predm,"
+                + " p.cena as Price,"
+                + " ku.id_zlavy as zlava,"
+                + " p.znacka as znacka"
+                + " from Predmet_predaja p"
+                + " join Kategorie k using (id_kategorie)"
+                + " left join Kumulacia_zliav ku using (id_predmetu)"
+                + " where p.cena <=  " + maxPrice
+                + category +brand;
+                
+
+        List<Product> result = new ArrayList<>();
+        ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    String belt = rs.getString("znacka");
+                    String nameOfItem = rs.getString("nazov_predm");
+                    int idDiscout = rs.getInt("zlava");
+                    double Price = rs.getDouble("Price");
+                    Product prod = new Product(nameOfItem,belt,Price,idDiscout);
+                    result.add(prod);
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
     
     
     
@@ -396,6 +439,55 @@ public class Reports {
             if (rs != null) {
                 while (rs.next()) {
                     result.add(rs.getString("id_objednavky"));
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+     public ArrayList<String> getCategories() {
+         ArrayList<String> result = new ArrayList<>();
+         ResultSet rs = DbManager.querySQL( "SELECT"
+                + " nazov"
+                + " FROM"
+                + " Kategorie"
+            );
+
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    result.add(rs.getString("nazov"));
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+     
+     public ArrayList<String> getBrand() {
+         ArrayList<String> result = new ArrayList<>();
+         ResultSet rs = DbManager.querySQL( "SELECT distinct"
+                + " znacka"
+                + " FROM"
+                + " Predmet_predaja"
+                + " where znacka is not null"
+            );
+
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    result.add(rs.getString("znacka"));
                 }
                 rs.close();
 

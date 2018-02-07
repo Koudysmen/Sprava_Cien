@@ -7,12 +7,14 @@ package view;
 
 import Connect.DBManager;
 import Controler.Account;
+import Controler.ControlerProductDetails;
 import Controler.Reports;
 import Model_Object.AccountMyOrder;
 import Model_Object.City;
 import Model_Object.Discount;
 import Model_Object.OrderDetail;
 import Model_Object.Person;
+import Model_Object.Product;
 import Model_Object.UserCompany;
 import java.awt.Color;
 import java.awt.Frame;
@@ -22,13 +24,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.Event;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.JSlider;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -36,14 +43,16 @@ import javax.swing.table.DefaultTableModel;
  * @author Michal
  */
 public class App extends javax.swing.JFrame {
+
     private static DBManager DbManager;
     private static UserCompany User;
     private static Person Person;
     private static City City;
     private Account Account;
     private Reports Report;
-    
+    private ControlerProductDetails ConProductDetails;
     SimpleDateFormat Formater = new SimpleDateFormat("dd.MM.yyyy");
+
     /**
      * Creates new form App
      */
@@ -55,24 +64,25 @@ public class App extends javax.swing.JFrame {
         this.Report = new Reports(dbManager);
         initComponents();
         setVisible(true);
+        this.ConProductDetails = new ControlerProductDetails(dbManager);
         setUserPropreties();
         jButtonActually.setBackground(Color.DARK_GRAY);
         jButtonAll.setBackground(Color.DARK_GRAY);
         refreshComboBoxes();
-        
-    }
-    public App(DBManager dbManager){
-     this.DbManager = dbManager;
-     this.Report = new Reports(dbManager);
+        ShowAllOrder();
+        showProduct();
     }
 
-    
-    
+    public App(DBManager dbManager) {
+        this.DbManager = dbManager;
+        this.Report = new Reports(dbManager);
+    }
+
     public void setUserPropreties() {
         String PSC = "";
         PSC = Person.getPSC();
         jLabelAcName.setText(Person.getName());
-        jLabelAccountSurname.setText(Person.getSurname() );
+        jLabelAccountSurname.setText(Person.getSurname());
         jLabelAccountBornNumber.setText(User.getRC());
         jLabelAccountEmail.setText(User.getEmailLog());
         jLabelAccountCity.setText(City.getNameOfTown());
@@ -80,20 +90,81 @@ public class App extends javax.swing.JFrame {
         jLabelAccountPSC.setText(Person.getPSC());
         jLabelNameOfCompany.setText(User.getICO());
         jLabelNameOfNationaly.setText("Slovakia");
-        if(User.getICO()!=null){
-        jLabelNameOfCompany.setText(Account.getNameOfCompany(User.getICO())); 
+        if (User.getICO() != null) {
+            jLabelNameOfCompany.setText(Account.getNameOfCompany(User.getICO()));
         }
+        jLabelPriceValue.setText(String.valueOf(jSliderMaxPrice.getValue()));
     }
-    
-    public void refreshComboBoxes(){
+
+    public void refreshComboBoxes() {
         List<String> IdOrder = Report.getIdOrder(User.getEmailLog());
         jComboBoxUserOrder.setModel(new DefaultComboBoxModel(IdOrder.toArray()));
-    
-    
+
+        List<String> NameOdCategory = new ArrayList<>(Arrays.asList(""));
+        NameOdCategory.addAll(Report.getCategories());
+        jComboBoxCategories.setModel(new DefaultComboBoxModel(NameOdCategory.toArray()));
+
+        List<String> Brand = new ArrayList<>(Arrays.asList(""));
+        Brand.addAll(Report.getBrand());
+        jComboBoxBrand.setModel(new DefaultComboBoxModel(Brand.toArray()));
     }
-    
-   
-     // TODO add your handling code here:
+
+    private void ShowAllOrder() {
+        jLabelSetState.setText("All");
+        Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+                String email = User.getEmailLog();
+                //                String state = "N";
+                List<AccountMyOrder> UserOrder = Report.getUserOrder(email);
+                Object[][] o = new Object[UserOrder.size()][4];
+                for (AccountMyOrder myOrder : UserOrder) {
+                    o[i][0] = myOrder.getIdCustOrder();
+                    o[i][1] = Formater.format(myOrder.getDateOfOrder());
+                    if ("Y".equals(myOrder.getState())) {
+                        o[i][2] = "delivered";
+                    } else {
+                        o[i][2] = "sended";
+                    }
+                    o[i][3] = myOrder.getTotalPrice();
+                    i++;
+                }
+                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of Order", "Date of order", " State", " Total Price"});
+                jTableMyOrder.setModel(d);
+                jButtonAll.setBackground(Color.DARK_GRAY);
+            }
+        });
+        t1.start();
+    }
+
+    private void showProduct() {
+        Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                int i = 0;
+                String category = String.valueOf(jComboBoxCategories.getSelectedItem());
+                String brand = String.valueOf(jComboBoxBrand.getSelectedItem());
+                double maxPrice = Double.parseDouble(String.valueOf(jSliderMaxPrice.getValue()));
+                List<Product> product = Report.getProduct(brand, category, maxPrice);
+                Object[][] o = new Object[product.size()][4];
+                for (Product prod : product) {
+                    o[i][0] = prod.getNameOfProduct();
+                    o[i][1] = prod.getBrand();
+                    if (0 == prod.getZlava()) {
+                        o[i][2] = "";
+                    } else {
+                        o[i][2] = prod.getZlava();
+                    }
+                    o[i][3] = prod.getPrice();
+                    i++;
+                }
+                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Name of product", "Brand", " Discount", " Price"});
+                jTableAllProduct.setModel(d);
+//                System.out.println(product.toString());
+            }
+        });
+        t1.start();
+    }
+    // TODO add your handling code here:
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -173,6 +244,24 @@ public class App extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
+        jPanel18 = new javax.swing.JPanel();
+        jLabel22 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
+        jPanel19 = new javax.swing.JPanel();
+        jPanel20 = new javax.swing.JPanel();
+        jLabel23 = new javax.swing.JLabel();
+        jComboBoxCategories = new javax.swing.JComboBox<>();
+        jLabel24 = new javax.swing.JLabel();
+        jComboBoxBrand = new javax.swing.JComboBox<>();
+        jLabel25 = new javax.swing.JLabel();
+        jSliderMaxPrice = new javax.swing.JSlider();
+        jLabelPriceValue = new javax.swing.JLabel();
+        jButton7 = new javax.swing.JButton();
+        jPanel21 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTableAllProduct = new javax.swing.JTable();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
 
         jRadioButtonMenuItem1.setSelected(true);
         jRadioButtonMenuItem1.setText("jRadioButtonMenuItem1");
@@ -541,6 +630,7 @@ public class App extends javax.swing.JFrame {
         jPanel11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jPanel12.setBackground(new java.awt.Color(0, 102, 255));
+        jPanel12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel15.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
         jLabel15.setText("Order detail: ");
@@ -563,7 +653,7 @@ public class App extends javax.swing.JFrame {
         );
 
         jLabel16.setFont(new java.awt.Font("Tekton Pro", 0, 18)); // NOI18N
-        jLabel16.setText("Number of order: ");
+        jLabel16.setText("Select number of order: ");
 
         jButtonShow.setBackground(new java.awt.Color(102, 102, 102));
         jButtonShow.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
@@ -586,6 +676,7 @@ public class App extends javax.swing.JFrame {
         jScrollPane3.setViewportView(jTableOrderDetail);
 
         jPanel15.setBackground(new java.awt.Color(0, 102, 255));
+        jPanel15.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel17.setFont(new java.awt.Font("Tekton Pro", 0, 18)); // NOI18N
         jLabel17.setText("Date of Order:");
@@ -605,12 +696,12 @@ public class App extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelDtaOfOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabelDtaOfOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(68, 68, 68)
                 .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabelTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
         jPanel15Layout.setVerticalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -621,14 +712,13 @@ public class App extends javax.swing.JFrame {
                     .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabelDtaOfOrder, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE))
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)))
+                .addGap(20, 20, 20)
+                .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
+            .addGroup(jPanel15Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabelDtaOfOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
@@ -640,14 +730,14 @@ public class App extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3)
+                    .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(39, 39, 39)
                         .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jButtonShow, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jComboBoxUserOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -655,11 +745,13 @@ public class App extends javax.swing.JFrame {
                 .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jComboBoxUserOrder, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE))
-                .addGap(30, 30, 30)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addComponent(jComboBoxUserOrder)
+                        .addGap(5, 5, 5)))
+                .addGap(32, 32, 32)
                 .addComponent(jButtonShow, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40)
                 .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -715,7 +807,7 @@ public class App extends javax.swing.JFrame {
                 .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(32, 32, 32)
                 .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 290, Short.MAX_VALUE))
+                .addGap(0, 302, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -725,7 +817,7 @@ public class App extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 1288, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 1290, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -840,7 +932,7 @@ public class App extends javax.swing.JFrame {
                 .addComponent(cbInactive)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel17Layout.createSequentialGroup()
-                .addContainerGap(26, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(52, 52, 52))
         );
@@ -862,22 +954,238 @@ public class App extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(33, 33, 33)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(521, Short.MAX_VALUE))
+                .addContainerGap(533, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("My discount", jPanel4);
+
+        jPanel18.setBackground(new java.awt.Color(0, 102, 255));
+        jPanel18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel22.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jLabel22.setText("Shop");
+
+        jButton4.setBackground(new java.awt.Color(102, 102, 102));
+        jButton4.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jButton4.setText("Shopping bag:");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel18Layout = new javax.swing.GroupLayout(jPanel18);
+        jPanel18.setLayout(jPanel18Layout);
+        jPanel18Layout.setHorizontalGroup(
+            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel18Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(173, 173, 173))
+        );
+        jPanel18Layout.setVerticalGroup(
+            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel18Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(24, Short.MAX_VALUE))
+        );
+
+        jPanel20.setBackground(new java.awt.Color(0, 102, 255));
+        jPanel20.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel23.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jLabel23.setText("Brand:");
+
+        jComboBoxCategories.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxCategoriesItemStateChanged(evt);
+            }
+        });
+        jComboBoxCategories.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxCategoriesActionPerformed(evt);
+            }
+        });
+
+        jLabel24.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jLabel24.setText("Categories:");
+
+        jComboBoxBrand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxBrandActionPerformed(evt);
+            }
+        });
+
+        jLabel25.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jLabel25.setText("Max price:");
+
+        jSliderMaxPrice.setMaximum(2000);
+        jSliderMaxPrice.setMinimum(1);
+        jSliderMaxPrice.setValue(2000);
+        jSliderMaxPrice.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSliderMaxPriceStateChanged(evt);
+            }
+        });
+        jSliderMaxPrice.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jSliderMaxPriceMouseClicked(evt);
+            }
+        });
+
+        jLabelPriceValue.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+
+        jButton7.setBackground(new java.awt.Color(102, 102, 102));
+        jButton7.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jButton7.setText("Refresh");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel20Layout = new javax.swing.GroupLayout(jPanel20);
+        jPanel20.setLayout(jPanel20Layout);
+        jPanel20Layout.setHorizontalGroup(
+            jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel20Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel20Layout.createSequentialGroup()
+                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jComboBoxCategories, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(39, 39, 39)
+                        .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxBrand, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(31, 31, 31)
+                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jSliderMaxPrice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabelPriceValue, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel20Layout.setVerticalGroup(
+            jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel20Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSliderMaxPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxCategories, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxBrand, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabelPriceValue, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton7)
+                .addGap(9, 9, 9))
+        );
+
+        jTableAllProduct.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane2.setViewportView(jTableAllProduct);
+
+        jButton5.setBackground(new java.awt.Color(102, 102, 102));
+        jButton5.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jButton5.setText("Add to shopping bag");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton6.setBackground(new java.awt.Color(102, 102, 102));
+        jButton6.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jButton6.setText("Detail");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel21Layout = new javax.swing.GroupLayout(jPanel21);
+        jPanel21.setLayout(jPanel21Layout);
+        jPanel21Layout.setHorizontalGroup(
+            jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel21Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1285, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(jPanel21Layout.createSequentialGroup()
+                .addGap(359, 359, 359)
+                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(64, 64, 64)
+                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel21Layout.setVerticalGroup(
+            jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel21Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(41, 41, 41)
+                .addGroup(jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(215, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel19Layout = new javax.swing.GroupLayout(jPanel19);
+        jPanel19.setLayout(jPanel19Layout);
+        jPanel19Layout.setHorizontalGroup(
+            jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel19Layout.createSequentialGroup()
+                .addComponent(jPanel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 1, Short.MAX_VALUE))
+        );
+        jPanel19Layout.setVerticalGroup(
+            jPanel19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel19Layout.createSequentialGroup()
+                .addComponent(jPanel20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1306, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 841, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel19, javax.swing.GroupLayout.PREFERRED_SIZE, 717, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Shop", jPanel3);
@@ -892,23 +1200,21 @@ public class App extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbActiveActionPerformed
-        if(cbActive.isSelected())
-        {
-        cbInactive.setSelected(false);
+        if (cbActive.isSelected()) {
+            cbInactive.setSelected(false);
         }
     }//GEN-LAST:event_cbActiveActionPerformed
 
     private void cbInactiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbInactiveActionPerformed
-            if(cbInactive.isSelected())
-        {
-        cbActive.setSelected(false);
+        if (cbInactive.isSelected()) {
+            cbActive.setSelected(false);
         }
     }//GEN-LAST:event_cbInactiveActionPerformed
 
@@ -917,8 +1223,8 @@ public class App extends javax.swing.JFrame {
         Thread t1 = new Thread(new Runnable() {
             public void run() {
                 int i = 0;
-               
-                int idOrder = Integer.parseInt((String)jComboBoxUserOrder.getSelectedItem());
+
+                int idOrder = Integer.parseInt((String) jComboBoxUserOrder.getSelectedItem());
                 List<OrderDetail> OrderDetail = Report.getOrderDetail(idOrder);
                 Object[][] o = new Object[OrderDetail.size()][6];
                 for (OrderDetail myOrder : OrderDetail) {
@@ -930,14 +1236,14 @@ public class App extends javax.swing.JFrame {
                     o[i][5] = myOrder.getPrice();
                     i++;
                 }
-                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of item", "Name " ," Count"," Brand"," Discount"," Price"});
+                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of item", "Name ", " Count", " Brand", " Discount", " Price"});
                 jTableOrderDetail.setModel(d);
                 jLabelTotalPrice.setText(String.valueOf(Report.getOrderPrice(idOrder)));
                 jLabelDtaOfOrder.setText(String.valueOf(Formater.format(Report.getOrderDate(idOrder))));
-                }
-            });
-        t1.start(); 
-        
+            }
+        });
+        t1.start();
+
     }//GEN-LAST:event_jButtonShowActionPerformed
 
     private void jButtonActuallyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonActuallyActionPerformed
@@ -952,13 +1258,13 @@ public class App extends javax.swing.JFrame {
                 for (AccountMyOrder myOrder : UserOrder) {
                     o[i][0] = myOrder.getIdCustOrder();
                     o[i][1] = Formater.format(myOrder.getDateOfOrder());
-                    if("N".equals(myOrder.getState())){
+                    if ("N".equals(myOrder.getState())) {
                         o[i][2] = "sended";
                     }
                     o[i][3] = myOrder.getTotalPrice();
                     i++;
                 }
-                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of Order", "Date of order" ," State"," Total Price"});
+                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of Order", "Date of order", " State", " Total Price"});
                 jTableMyOrder.setModel(d);
             }
         });
@@ -967,212 +1273,239 @@ public class App extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonActuallyActionPerformed
 
     private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed
-        jLabelSetState.setText("All");
-        Thread t1 = new Thread(new Runnable() {
-            public void run() {
-                int i = 0;
-                String email = User.getEmailLog();
-                //                String state = "N";
-                List<AccountMyOrder> UserOrder = Report.getUserOrder(email);
-                Object[][] o = new Object[UserOrder.size()][4];
-                for (AccountMyOrder myOrder : UserOrder) {
-                    o[i][0] = myOrder.getIdCustOrder();
-                    o[i][1] = Formater.format(myOrder.getDateOfOrder());
-                    if("Y".equals(myOrder.getState())){
-                        o[i][2] = "delivered";
-                    }else{
-                        o[i][2] = "sended";
-                    }
-                    o[i][3] = myOrder.getTotalPrice();
-                    i++;
-                }
-                DefaultTableModel d = new DefaultTableModel(o, new Object[]{" Number of Order", "Date of order" ," State"," Total Price"});
-                jTableMyOrder.setModel(d);
-                jButtonAll.setBackground(Color.DARK_GRAY);
-            }
-        });
-        t1.start();
-
+        ShowAllOrder();
     }//GEN-LAST:event_jButtonAllActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-          tabDiscount.removeAll();
-         String email = User.getEmailLog();
-         int user_id = Report.getUserId(email);
-         String valid = String.valueOf(cbValid.getSelectedItem());
-         // Active discounts
-        if(cbActive.isSelected()) {
+        tabDiscount.removeAll();
+        String email = User.getEmailLog();
+        int user_id = Report.getUserId(email);
+        String valid = String.valueOf(cbValid.getSelectedItem());
+        // Active discounts
+        if (cbActive.isSelected()) {
             // Active - valid discounts
-            if(valid.trim().equals("Valid"))
-            {  
-                  Thread t1 = new Thread(new Runnable() {
-            public void run() {
-                int i = 0;
-                ArrayList<Discount> discounts = Report.getAktivValidDiscount(user_id);
-                Object [][] o = new Object[discounts.size()][8];
-                for(Discount d : discounts)
-                {
-                o[i][0] = d.getId_discnt();
-                   
-                    try {
-               o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            if (valid.trim().equals("Valid")) {
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+                        int i = 0;
+                        ArrayList<Discount> discounts = Report.getAktivValidDiscount(user_id);
+                        Object[][] o = new Object[discounts.size()][8];
+                        for (Discount d : discounts) {
+                            o[i][0] = d.getId_discnt();
+
+                            try {
+                                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                            } catch (SQLException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            if (d.getId_price_discnt() == 0) {
+                                o[i][2] = "";
+                            } else {
+                                o[i][2] = d.getId_price_discnt();
+                            }
+                            if (d.getId_per_discnt() == 0) {
+                                o[i][3] = "";
+                            } else {
+                                o[i][3] = d.getId_per_discnt();
+                            }
+                            o[i][4] = d.getDescribe();
+                            o[i][5] = d.getActive();
+                            o[i][6] = Formater.format(d.getDat_from());
+                            if (d.getDat_to() != null) {
+                                o[i][7] = Formater.format(d.getDat_to());
+                            }
+                            i++;
+                        }
+                        DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " Type of Discount", " ID Price Discount", " ID Per Discount", " Code of Discount", " Active", " Date From", " Date To"});
+                        tabDiscount.setModel(t);
+
                     }
-                   
-                if(d.getId_price_discnt()==0)
-                {o[i][2] = "";}    
-                else
-                {o[i][2] = d.getId_price_discnt();}   
-                if(d.getId_per_discnt()==0)
-                {o[i][3]="";}
-                else
-                {o[i][3] = d.getId_per_discnt();}
-                o[i][4] = d.getDescribe();
-                o[i][5] = d.getActive();
-                o[i][6] = Formater.format(d.getDat_from());
-                if(d.getDat_to()!=null)
-                {o[i][7] = Formater.format(d.getDat_to());}
-                i++;
-                }
-                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " Type of Discount" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
-                tabDiscount.setModel(t);
-                
-                }
-            });
-        t1.start(); 
+                });
+                t1.start();
             } // active invalid discounts
-            else if(valid.trim().equals("Invalid"))
-            {
-             Thread t1 = new Thread(new Runnable() {
-            public void run() {
-                int i = 0;
-                ArrayList<Discount> discounts = Report.getAktivInvalidDiscount(user_id);
-                Object [][] o = new Object[discounts.size()][8];
-                for(Discount d : discounts)
-                {
-                o[i][0] = d.getId_discnt();
-                    try {
-                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+            else if (valid.trim().equals("Invalid")) {
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+                        int i = 0;
+                        ArrayList<Discount> discounts = Report.getAktivInvalidDiscount(user_id);
+                        Object[][] o = new Object[discounts.size()][8];
+                        for (Discount d : discounts) {
+                            o[i][0] = d.getId_discnt();
+                            try {
+                                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                            } catch (SQLException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if (d.getId_price_discnt() == 0) {
+                                o[i][2] = "";
+                            } else {
+                                o[i][2] = d.getId_price_discnt();
+                            }
+                            if (d.getId_per_discnt() == 0) {
+                                o[i][3] = "";
+                            } else {
+                                o[i][3] = d.getId_per_discnt();
+                            }
+                            o[i][4] = d.getDescribe();
+                            o[i][5] = d.getActive();
+                            o[i][6] = Formater.format(d.getDat_from());
+                            if (d.getDat_to() != null) {
+                                o[i][7] = Formater.format(d.getDat_to());
+                            }
+                            i++;
+                        }
+                        DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type", " ID Price Discount", " ID Per Discount", " Code of Discount", " Active", " Date From", " Date To"});
+                        tabDiscount.setModel(t);
+
                     }
-                if(d.getId_price_discnt()==0)
-                {o[i][2] = "";}    
-                else
-                {o[i][2] = d.getId_price_discnt();}   
-                if(d.getId_per_discnt()==0)
-                {o[i][3]="";}
-                else
-                {o[i][3] = d.getId_per_discnt();}
-                o[i][4] = d.getDescribe();
-                o[i][5] = d.getActive();
-                o[i][6] = Formater.format(d.getDat_from());
-                if(d.getDat_to()!=null)
-                {o[i][7] = Formater.format(d.getDat_to());}
-                i++;
-                }
-                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
-                tabDiscount.setModel(t);
-                
-                }
-            });
-        t1.start(); 
+                });
+                t1.start();
+            } else {
+                JOptionPane.showMessageDialog(null, "Please choose validation type", "Warning", JOptionPane.WARNING_MESSAGE);
             }
-       
-            else
-            {
-                JOptionPane.showMessageDialog(null, "Please choose validation type","Warning",JOptionPane.WARNING_MESSAGE);
+
+        } // Inactive discounts
+        else {
+            //inactive valid discount
+            if (valid.trim().equals("Valid")) {
+
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+                        int i = 0;
+                        ArrayList<Discount> discounts = Report.getInaktivValidDiscount(user_id);
+                        Object[][] o = new Object[discounts.size()][8];
+                        for (Discount d : discounts) {
+                            o[i][0] = d.getId_discnt();
+                            try {
+                                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                            } catch (SQLException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if (d.getId_price_discnt() == 0) {
+                                o[i][2] = "";
+                            } else {
+                                o[i][2] = d.getId_price_discnt();
+                            }
+                            if (d.getId_per_discnt() == 0) {
+                                o[i][3] = "";
+                            } else {
+                                o[i][3] = d.getId_per_discnt();
+                            }
+                            o[i][4] = d.getDescribe();
+                            o[i][5] = d.getActive();
+                            o[i][6] = Formater.format(d.getDat_from());
+                            if (d.getDat_to() != null) {
+                                o[i][7] = Formater.format(d.getDat_to());
+                            }
+                            i++;
+                        }
+                        DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type", " ID Price Discount", " ID Per Discount", " Code of Discount", " Active", " Date From", " Date To"});
+                        tabDiscount.setModel(t);
+
+                    }
+                });
+                t1.start();
+            } // inactive invalid discounts
+            else if (valid.trim().equals("Invalid")) {
+
+                Thread t1 = new Thread(new Runnable() {
+                    public void run() {
+                        int i = 0;
+                        ArrayList<Discount> discounts = Report.getInaktivInvalidDiscount(user_id);
+                        Object[][] o = new Object[discounts.size()][8];
+                        for (Discount d : discounts) {
+                            o[i][0] = d.getId_discnt();
+                            try {
+                                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
+                            } catch (SQLException ex) {
+                                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if (d.getId_price_discnt() == 0) {
+                                o[i][2] = "";
+                            } else {
+                                o[i][2] = d.getId_price_discnt();
+                            }
+                            if (d.getId_per_discnt() == 0) {
+                                o[i][3] = "";
+                            } else {
+                                o[i][3] = d.getId_per_discnt();
+                            }
+                            o[i][4] = d.getDescribe();
+                            o[i][5] = d.getActive();
+                            o[i][6] = Formater.format(d.getDat_from());
+                            if (d.getDat_to() != null) {
+                                o[i][7] = Formater.format(d.getDat_to());
+                            }
+                            i++;
+                        }
+                        DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type", " ID Price Discount", " ID Per Discount", " Code of Discount", " Active", " Date From", " Date To"});
+                        tabDiscount.setModel(t);
+
+                    }
+                });
+                t1.start();
+            } else {
+                JOptionPane.showMessageDialog(null, "Please choose validation type", "Warning", JOptionPane.WARNING_MESSAGE);
             }
-       
         }
-        // Inactive discounts
-        else
-        {
-                //inactive valid discount
-              if(valid.trim().equals("Valid"))
-              {
-              
-             Thread t1 = new Thread(new Runnable() {
-            public void run() {
-                int i = 0;
-                ArrayList<Discount> discounts = Report.getInaktivValidDiscount(user_id);
-                Object [][] o = new Object[discounts.size()][8];
-                for(Discount d : discounts)
-                {
-                o[i][0] = d.getId_discnt();
-                    try {
-                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                if(d.getId_price_discnt()==0)
-                {o[i][2] = "";}    
-                else
-                {o[i][2] = d.getId_price_discnt();}   
-                if(d.getId_per_discnt()==0)
-                {o[i][3]="";}
-                else
-                {o[i][3] = d.getId_per_discnt();}
-                o[i][4] = d.getDescribe();
-                o[i][5] = d.getActive();
-                o[i][6] = Formater.format(d.getDat_from());
-                if(d.getDat_to()!=null)
-                {o[i][7] = Formater.format(d.getDat_to());}
-                i++;
-                }
-                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
-                tabDiscount.setModel(t);
-                
-                }
-            });
-        t1.start(); 
-              }
-              // inactive invalid discounts
-             else if(valid.trim().equals("Invalid"))
-              {
-              
-             Thread t1 = new Thread(new Runnable() {
-            public void run() {
-                int i = 0;
-                ArrayList<Discount> discounts = Report.getInaktivInvalidDiscount(user_id);
-                Object [][] o = new Object[discounts.size()][8];
-                for(Discount d : discounts)
-                {
-                o[i][0] = d.getId_discnt();
-                    try {
-                o[i][1] = Report.getNameOfTypeDiscount(d.getId_type());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                if(d.getId_price_discnt()==0)
-                {o[i][2] = "";}    
-                else
-                {o[i][2] = d.getId_price_discnt();}   
-                if(d.getId_per_discnt()==0)
-                {o[i][3]="";}
-                else
-                {o[i][3] = d.getId_per_discnt();}
-                o[i][4] = d.getDescribe();
-                o[i][5] = d.getActive();
-                o[i][6] = Formater.format(d.getDat_from());
-                if(d.getDat_to()!=null)
-                {o[i][7] = Formater.format(d.getDat_to());}
-                i++;
-                }
-                DefaultTableModel t = new DefaultTableModel(o, new Object[]{" ID Discount", " ID Type" ," ID Price Discount"," ID Per Discount"," Code of Discount"," Active"," Date From"," Date To"});
-                tabDiscount.setModel(t);
-                
-                }
-            });
-        t1.start(); 
-              }
-             else
-            {
-                JOptionPane.showMessageDialog(null, "Please choose validation type","Warning",JOptionPane.WARNING_MESSAGE);
-            }
-        }    
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jComboBoxCategoriesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxCategoriesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxCategoriesActionPerformed
+
+    private void jSliderMaxPriceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jSliderMaxPriceMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jSliderMaxPriceMouseClicked
+
+    private void jSliderMaxPriceStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSliderMaxPriceStateChanged
+        jLabelPriceValue.setText(String.valueOf(jSliderMaxPrice.getValue()));
+    }//GEN-LAST:event_jSliderMaxPriceStateChanged
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        if (jTableAllProduct.getSelectedRow() != -1) {
+            if (jTableAllProduct.getSelectedRowCount() == 1) {
+//              jTableAllProduct.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                String category = String.valueOf(jComboBoxCategories.getSelectedItem());
+                String brand = String.valueOf(jComboBoxBrand.getSelectedItem());
+                int index = jTableAllProduct.getSelectedRow();
+                double maxPrice = Double.parseDouble(String.valueOf(jSliderMaxPrice.getValue()));
+                boolean result = ConProductDetails.getDetails(brand, category, maxPrice,index);
+                if (!result) {
+                    JOptionPane.showMessageDialog(this, "Niekde je chyba");
+                } else {
+                    new ProductDetail(DbManager, ConProductDetails.getProduct());
+                    
+                    System.out.println("bla bla blaaaaaaaaaaaaaaaaaaaaa" + ConProductDetails.getProduct().getNameOfProduct());
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Choose only one row", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Choose row ", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jComboBoxCategoriesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCategoriesItemStateChanged
+
+    }//GEN-LAST:event_jComboBoxCategoriesItemStateChanged
+
+    private void jComboBoxBrandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBrandActionPerformed
+
+    }//GEN-LAST:event_jComboBoxBrandActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        showProduct();
+    }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1204,7 +1537,7 @@ public class App extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new App(DbManager,User,Person,City).setVisible(true);
+                new App(DbManager, User, Person, City).setVisible(true);
             }
         });
     }
@@ -1215,9 +1548,15 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cbValid;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JButton jButtonActually;
     private javax.swing.JButton jButtonAll;
     private javax.swing.JButton jButtonShow;
+    private javax.swing.JComboBox<String> jComboBoxBrand;
+    private javax.swing.JComboBox<String> jComboBoxCategories;
     private javax.swing.JComboBox<String> jComboBoxUserOrder;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -1233,6 +1572,10 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1251,6 +1594,7 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelDtaOfOrder;
     private javax.swing.JLabel jLabelNameOfCompany;
     private javax.swing.JLabel jLabelNameOfNationaly;
+    private javax.swing.JLabel jLabelPriceValue;
     private javax.swing.JLabel jLabelSetState;
     private javax.swing.JLabel jLabelSetState1;
     private javax.swing.JLabel jLabelTotalPrice;
@@ -1263,7 +1607,11 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
+    private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel20;
+    private javax.swing.JPanel jPanel21;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
@@ -1273,9 +1621,12 @@ public class App extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JSlider jSliderMaxPrice;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTableAllProduct;
     private javax.swing.JTable jTableMyOrder;
     private javax.swing.JTable jTableOrderDetail;
     private javax.swing.JTable tabDiscount;
