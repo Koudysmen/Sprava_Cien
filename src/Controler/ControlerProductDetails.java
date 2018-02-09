@@ -69,6 +69,60 @@ public class ControlerProductDetails {
 
         return result;
     }
+    public String getPopis(String name) {
+        String result = null;
+
+        String query = "SELECT"
+                + " popis"
+                + " FROM"
+                + " Predmet_predaja"
+                + " WHERE nazov like " + addApostrofs(name);
+
+        ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                while (rs.next()) {
+                    //Retrieve by column name
+                    result = rs.getString("popis");
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+      return result;
+    }
+    
+     public String getSerialNumber(String name) {
+        String result = null;
+
+        String query = "SELECT"
+                + " seriove_cislo"
+                + " FROM"
+                + " Predmet_predaja"
+                + " WHERE nazov like " + addApostrofs(name);
+
+        ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                while (rs.next()) {
+                    //Retrieve by column name
+                    result = rs.getString("seriove_cislo");
+                }
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+      return result;
+    }
+    
          
     public Product getProduct() {
         return Product;
