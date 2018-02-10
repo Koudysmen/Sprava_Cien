@@ -53,10 +53,11 @@ public class App extends javax.swing.JFrame {
     private Reports Report;
     private OrderNew orderNew;
     private ControlerProductDetails ConProductDetails;
+    private DefaultTableModel OrderItem;
     SimpleDateFormat Formater = new SimpleDateFormat("dd.MM.yyyy");
     private double totalPrice = 0;
     int[] indexs = new int[10];
-    
+    Object[] o = new Object[4];
 
     /**
      * Creates new form App
@@ -173,19 +174,13 @@ public class App extends javax.swing.JFrame {
 
     private void ChooseProductToBuy() {
         TableModel model1 = jTableAllProduct.getModel();
-        int indexs[] = jTableAllProduct.getSelectedRows();
-
-        Object[] o = new Object[4];
-        OrderNew orderNew = new OrderNew(DbManager);
-
-        DefaultTableModel model2 = (DefaultTableModel) orderNew.jTableMyOrderItem.getModel();
+        OrderItem = (DefaultTableModel) orderNew.jTableMyOrderItem.getModel();
         for (int i = 0; i < indexs.length; i++) {
             o[0] = model1.getValueAt(indexs[i], 0);
             o[1] = model1.getValueAt(indexs[i], 1);
             o[2] = model1.getValueAt(indexs[i], 2);
             o[3] = model1.getValueAt(indexs[i], 3);
-
-            model2.addRow(o);
+            OrderItem.addRow(o);
         }
     }
     // TODO add your handling code here:
@@ -1473,18 +1468,13 @@ public class App extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButtonShoppingBagActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShoppingBagActionPerformed
-        TableModel model1 = jTableAllProduct.getModel(); 
-        Object[] o = new Object[4];
-                    DefaultTableModel model2 = (DefaultTableModel) orderNew.jTableMyOrderItem.getModel();
-                    for (int i = 0; i < indexs.length; i++) {
-                        o[0] = model1.getValueAt(indexs[i], 0);
-                        o[1] = model1.getValueAt(indexs[i], 1);
-                        o[2] = model1.getValueAt(indexs[i], 2);
-                        o[3] = model1.getValueAt(indexs[i], 3);
-                        model2.addRow(o);
-                    }
-         
-        orderNew.setVisible(true);
+        if (totalPrice > 0) {
+            
+                orderNew.setVisible(true);
+            
+        } else {
+            JOptionPane.showMessageDialog(null, "Shopping bag is empty", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_jButtonShoppingBagActionPerformed
 
     private void jComboBoxCategoriesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxCategoriesActionPerformed
@@ -1501,7 +1491,8 @@ public class App extends javax.swing.JFrame {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         if (jTableAllProduct.getSelectedRow() != -1) {
-           String category = String.valueOf(jComboBoxCategories.getSelectedItem());
+            if (jTableAllProduct.getSelectedRowCount() == 1) {
+                String category = String.valueOf(jComboBoxCategories.getSelectedItem());
                 String brand = String.valueOf(jComboBoxBrand.getSelectedItem());
                 int index = jTableAllProduct.getSelectedRow();
                 double maxPrice = Double.parseDouble(String.valueOf(jSliderMaxPrice.getValue()));
@@ -1509,18 +1500,31 @@ public class App extends javax.swing.JFrame {
                 if (!result) {
                     JOptionPane.showMessageDialog(this, "Something is wrong");
                 } else {
-                    totalPrice += ConProductDetails.getProduct().getPrice();
-                    jButtonShoppingBag.setText("Shopping bag:  "
-                     + String.valueOf(totalPrice) + " €");
                     TableModel model1 = jTableAllProduct.getModel();
                     indexs = jTableAllProduct.getSelectedRows();
-
-                   
-//                    orderNew.setVisible(true);
-                
-                }  
+//                    if (orderNew.isShowing() == true) {
+//                        ChooseProductToBuy();
+//                    }
+                    OrderItem = (DefaultTableModel) orderNew.jTableMyOrderItem.getModel();
+       
+                    for (int i = 0; i < indexs.length; i++) {
+                         o[0] = model1.getValueAt(indexs[i], 0);
+                         o[1] = model1.getValueAt(indexs[i], 1);
+                         o[2] = model1.getValueAt(indexs[i], 2);
+                         o[3] = model1.getValueAt(indexs[i], 3);
+                         OrderItem.addRow(o);
+                        if (indexs[i] != -1) {
+                            totalPrice += ConProductDetails.getProduct().getPrice();
+                            jButtonShoppingBag.setText("Shopping bag:  "
+                                    + String.valueOf(totalPrice) + " €");
+                        }
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Choose only one product", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(null, "Choose row ", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Choose some product ", "Warning", JOptionPane.WARNING_MESSAGE);
         }
 
     }//GEN-LAST:event_jButton5ActionPerformed
@@ -1541,10 +1545,10 @@ public class App extends javax.swing.JFrame {
 
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Choose only one row", "Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Choose only one product", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Choose row ", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Choose product to datail view ", "Warning", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
 
