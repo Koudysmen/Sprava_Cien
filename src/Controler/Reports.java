@@ -64,6 +64,86 @@ public class Reports {
         return result;
     }
     
+    public boolean getPerCenDiscount(int userId, String disCode) throws SQLException
+    {
+        int perId=-1;
+        int cenId=-1;
+        
+        String query = "select id_per_zlavy from uzivatel_zlavy"
+                      +" JOIN zlava USING(id_zlavy)"
+                      +" where kod_zlavy = '"+disCode+"' and id_uzivatela = "+userId;
+        ResultSet rs = DbManager.querySQL(query);
+        
+        if(rs.next())
+        {
+        perId = rs.getInt("id_per_zlavy");
+        }
+     
+        
+        
+        query = "select id_cenovej_zlavy from uzivatel_zlavy"
+                      +" JOIN zlava USING(id_zlavy)"
+                      +" where kod_zlavy = '"+disCode+"' and id_uzivatela = "+userId;
+          rs = DbManager.querySQL(query);
+          
+          if(rs.next())
+          {
+          cenId = rs.getInt("id_cenovej_zlavy");
+          }
+              
+                   
+        return perId>0;
+        
+        /*
+        String query = "SELECT * "
+        + " FROM uzivatel_zlavy"
+        + " JOIN zlava USING(id_zlavy)"
+        + " JOIN cenova_zlava USING(id_cenovej_zlavy)"
+        + " JOIN percentualna_zlava USING(id_per_zlavy)"
+        + " WHERE id_uzivatela = "+userId
+        + " AND kod_zlavy = '"+disId+"'";
+        ResultSet rs = DbManager.querySQL(query);
+         */
+        
+    }
+    
+    public double getCenDis(int userId, String disCode) throws SQLException
+    {
+        double discount = 0.0;
+    String query = "SELECT hodnota_zlavy"
+            + " FROM uzivatel_zlavy"
+            + " JOIN zlava USING(id_zlavy)"
+            + " JOIN cenova_zlava USING(id_cenovej_zlavy)"
+            + " WHERE id_uzivatela = "+userId
+            + " AND kod_zlavy = '"+disCode+"'";
+        ResultSet rs = DbManager.querySQL(query);
+    
+        if(rs.next())
+        {
+         discount = rs.getDouble("hodnota_zlavy");
+        }
+        return discount; 
+    }
+    
+      public double getPerDis(int userId, String disCode) throws SQLException
+    {
+        double discount = 0.0;
+    String query = "SELECT percent_zlavy"
+            + " FROM uzivatel_zlavy"
+            + " JOIN zlava USING(id_zlavy)"
+            + " JOIN percentualna_zlava USING(id_per_zlavy)"
+            + " WHERE id_uzivatela = "+userId
+            + " AND kod_zlavy = '"+disCode+"'";
+        ResultSet rs = DbManager.querySQL(query);
+    
+        if(rs.next())
+        {
+         discount = rs.getDouble("percent_zlavy");
+        }
+        return discount; 
+    }
+    
+    
     public List<AccountMyOrder> getUserOrderSended(String Email) {
        String query = "SELECT id_objednavky,"
                 + " dat_objednavky,"

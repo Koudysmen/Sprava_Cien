@@ -6,6 +6,14 @@
 package view;
 
 import Connect.DBManager;
+import Controler.Reports;
+import Model_Object.UserCompany;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 /**
@@ -14,14 +22,25 @@ import javax.swing.table.TableModel;
  */
 public class OrderNew extends javax.swing.JFrame {
     private static DBManager DbManager;
-    private static TableModel TableModel;
+    private static TableModel tableModel;
+    private DefaultTableModel modelShopBag;
+    private Reports Report;
+    private static UserCompany User;
+    private Object[] o;
+    private double totalPrice = 0.0;
+    
     /**
      * Creates new form OrderNew
      */
-    public OrderNew(DBManager dbManager) {
+    public OrderNew(DBManager dbManager, UserCompany user) {
         this.DbManager = dbManager;
+        this.User = user;
         initComponents();
+        jlTotalPrice.setText(""+totalPrice);
+        this.Report = new Reports(dbManager);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        tableModel = jTableMyOrderItem.getModel();
+        modelShopBag = (DefaultTableModel) jTableMyOrderItem.getModel();
     }
 
     /**
@@ -51,6 +70,7 @@ public class OrderNew extends javax.swing.JFrame {
         jButtonShow = new javax.swing.JButton();
         jButtonShow1 = new javax.swing.JButton();
         jButtonAll = new javax.swing.JButton();
+        jlTotalPrice = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -161,6 +181,9 @@ public class OrderNew extends javax.swing.JFrame {
             }
         });
 
+        jlTotalPrice.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
+        jlTotalPrice.setText("0.0");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -174,7 +197,9 @@ public class OrderNew extends javax.swing.JFrame {
                         .addComponent(jLabel26, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(63, 63, 63)
                         .addComponent(jLabelPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(136, 136, 136)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jlTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(62, 62, 62)
                         .addComponent(jLabelPrice2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -210,7 +235,8 @@ public class OrderNew extends javax.swing.JFrame {
                     .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabelPrice)
                     .addComponent(jLabelPrice2, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
-                    .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jlTotalPrice))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(35, 35, 35)
@@ -253,13 +279,68 @@ public class OrderNew extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonShowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShowActionPerformed
-        
+String code = jTextDicoutCode.getText().trim();
+String email = User.getEmailLog();
+int user_id = Report.getUserId(email);
+double perDis = 0.0;
+double cenDis = 0.0;
+        try {
+   
+boolean per = Report.getPerCenDiscount(user_id, code);
+      
+           if(per)
+           {
+        {   perDis = Report.getPerDis(user_id, code);                     
+            System.out.println("percentualna "+perDis);
+        }         
+           }
+     else
+           {                         
+           cenDis = Report.getCenDis(user_id, code);
+           System.out.println("cenova "+cenDis);
+           if(totalPrice>cenDis)
+           {
+           totalPrice = totalPrice - cenDis;
+          jlTotalPrice.setText(""+totalPrice);
+           }
+           else
+           {
+            JOptionPane.showMessageDialog(null, "Minimum price must be higher than discount", "Warning", JOptionPane.WARNING_MESSAGE);           
+           }
+           }
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderNew.class.getName()).log(Level.SEVERE, null, ex);
+        }  
+ 
     }//GEN-LAST:event_jButtonShowActionPerformed
 
     private void jButtonShow1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShow1ActionPerformed
-        // TODO add your handling code here:
+      
+      int selectRow = jTableMyOrderItem.getSelectedRow();
+      modelShopBag.removeRow(selectRow);
+      
+      
+      setTotalPrice();      
+    
     }//GEN-LAST:event_jButtonShow1ActionPerformed
 
+    public void setTotalPrice()
+    {
+        double price= 0.0;
+      for(int i=0; i<modelShopBag.getRowCount();i++)
+      {
+      price += (double) modelShopBag.getValueAt(i, 3);     
+      }
+      totalPrice=price;
+      jlTotalPrice.setText(""+totalPrice);         
+      
+    }
+    
+    public double getTotalPrice()
+    {
+    return totalPrice;
+    }
+    
     private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed
        
     }//GEN-LAST:event_jButtonAllActionPerformed
@@ -267,12 +348,9 @@ public class OrderNew extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
+    /*
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+      
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -291,14 +369,23 @@ public class OrderNew extends javax.swing.JFrame {
         }
         //</editor-fold>
 
-        /* Create and display the form */
+        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new OrderNew(DbManager).setVisible(true);
             }
         });
     }
-
+    */
+    public void setO(Object[] o)
+    {this.o = o;}
+    
+    public Object[] getO()
+    {
+    return o;
+    }
+    
+               
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAll;
     private javax.swing.JButton jButtonShow;
@@ -318,5 +405,6 @@ public class OrderNew extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JTable jTableMyOrderItem;
     private javax.swing.JTextField jTextDicoutCode;
+    private javax.swing.JLabel jlTotalPrice;
     // End of variables declaration//GEN-END:variables
 }

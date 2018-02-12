@@ -58,6 +58,7 @@ public class App extends javax.swing.JFrame {
     private double totalPrice = 0;
     int[] indexs = new int[10];
     Object[] o = new Object[4];
+    
 
     /**
      * Creates new form App
@@ -68,7 +69,7 @@ public class App extends javax.swing.JFrame {
         this.City = city;
         this.DbManager = dbManager;
         this.Report = new Reports(dbManager);
-        this.orderNew = new OrderNew(dbManager);
+        this.orderNew = new OrderNew(dbManager, user);
         initComponents();
         setVisible(true);
         this.ConProductDetails = new ControlerProductDetails(dbManager);
@@ -78,6 +79,10 @@ public class App extends javax.swing.JFrame {
         refreshComboBoxes();
         ShowAllOrder();
         showProduct();
+        
+          totalPrice = getTotalPriceFromBag();
+                            jButtonShoppingBag.setText("Shopping bag:  "
+                                    + String.valueOf(totalPrice) + " €");
     }
 
     public App(DBManager dbManager) {
@@ -85,6 +90,20 @@ public class App extends javax.swing.JFrame {
         this.Report = new Reports(dbManager);
     }
 
+    public Object[] getO() {
+        return o;
+    }
+
+    public void setO(Object[] o) {
+        this.o = o;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+    
+    
+ 
     public void setUserPropreties() {
         String PSC = "";
         PSC = Person.getPSC();
@@ -1471,6 +1490,8 @@ public class App extends javax.swing.JFrame {
         if (totalPrice > 0) {
             
                 orderNew.setVisible(true);
+                orderNew.setO(o);
+                orderNew.setTotalPrice();
             
         } else {
             JOptionPane.showMessageDialog(null, "Shopping bag is empty", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -1514,7 +1535,9 @@ public class App extends javax.swing.JFrame {
                          o[3] = model1.getValueAt(indexs[i], 3);
                          OrderItem.addRow(o);
                         if (indexs[i] != -1) {
-                            totalPrice += ConProductDetails.getProduct().getPrice();
+                            
+                        //    totalPrice += ConProductDetails.getProduct().getPrice();
+                        totalPrice = getTotalPriceFromBag();
                             jButtonShoppingBag.setText("Shopping bag:  "
                                     + String.valueOf(totalPrice) + " €");
                         }
@@ -1529,6 +1552,23 @@ public class App extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton5ActionPerformed
 
+    public double getTotalPriceFromBag()
+   { double price = 0.0;
+     if(OrderItem.getRowCount()!=0){
+     for(int i=0; i<OrderItem.getRowCount();i++)
+      {
+      price += (double) OrderItem.getValueAt(i, 3);     
+      }
+     }
+     return price;
+   }
+    
+    public Object getObject()
+    {
+    return o;
+    }
+    
+    
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         if (jTableAllProduct.getSelectedRow() != -1) {
             if (jTableAllProduct.getSelectedRowCount() == 1) {
@@ -1562,6 +1602,10 @@ public class App extends javax.swing.JFrame {
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         showProduct();
+        
+          totalPrice = getTotalPriceFromBag();
+                            jButtonShoppingBag.setText("Shopping bag:  "
+                                    + String.valueOf(totalPrice) + " €");
     }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
