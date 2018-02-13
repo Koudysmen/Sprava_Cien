@@ -18,11 +18,10 @@ public class CreateOrder {
    private Date dateOrder;
    private String state;
 
-    public CreateOrder(int Id, int IdSeller, int IdBuyer, Date dateOrder, String state) {
-        this.Id = Id;
+    public CreateOrder(Date dateOrder,int IdSeller, int IdBuyer, String state) {
+        this.dateOrder = dateOrder;
         this.IdSeller = IdSeller;
         this.IdBuyer = IdBuyer;
-        this.dateOrder = dateOrder;
         this.state = state;
     }
 

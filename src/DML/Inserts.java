@@ -7,6 +7,7 @@ package DML;
 
 import Connect.DBManager;
 import Model_Object.Company;
+import Model_Object.CreateOrder;
 import Model_Object.Person;
 import Model_Object.UserCompany;
 import java.sql.ResultSet;
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class Inserts {
      private DBManager DbManager;
-     
+      SimpleDateFormat Formater = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public Inserts(DBManager dbManager) {
         DbManager = dbManager;
@@ -66,6 +67,33 @@ public class Inserts {
                 + addApostrofs(person.getPSC()) + ",null)";
 
         DbManager.insertSql(query);
+    }
+    
+     public void insertProduct(int IdProduct,int IdDiscoutn,int IdOrder,double price) {
+        String query
+                = "INSERT INTO Polozka VALUES ("+ null +"," + IdProduct + ","
+                + IdDiscoutn + ","
+                + IdOrder + ", null,1,"
+                + price + ")";
+
+        DbManager.insertSql(query);
+    }
+    
+    public void insertOrder(CreateOrder order) {
+        String query
+                = "INSERT INTO OBJEDNAVKA VALUES ("+ null +"," +addApostrofs(Formater.format(order.getDateOrder()))+ ","
+                + order.getIdSeller() + ","
+                + order.getIdBuyer() + ","
+                + addApostrofs(order.getState()) + ")";
+
+        DbManager.insertSql(query);
+    }
+     public boolean updateDiscountToDeactive(int IdDiscount, int iDUser) {
+        return DbManager.updateSql("Update uzivatel_zlavy set"
+                + " aktivna = 'N'"
+                + " where id_zlavy = " + IdDiscount
+                + " and id_uzivatela = " + iDUser
+        );
     }
     
     

@@ -7,9 +7,12 @@ package view;
 
 import Connect.DBManager;
 import Controler.Reports;
+import DML.Inserts;
+import Model_Object.CreateOrder;
 import Model_Object.UserCompany;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -338,7 +341,53 @@ public class OrderNew extends javax.swing.JFrame {
     }
 
     private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed
-
+        Inserts DataManager = new Inserts(DbManager);
+        Reports report = new Reports(DbManager);
+        String code = jTextDicoutCode.getText().trim();
+        String email = User.getEmailLog();
+        int user_id = Report.getUserId(email);
+        double perDis = 0.0;
+        double cenDis = 0.0;
+        boolean per;
+         if(jTableMyOrderItem.getRowCount() > 0){
+            CreateOrder order = new CreateOrder(new Date(),4,user_id,"S");
+            DataManager.insertOrder(order);
+        try {
+            per = Report.getPerCenDiscount(user_id, code);
+             int IdOrder = report.getMaxIdOrder();
+            for (int i = 0; i < modelShopBag.getRowCount(); i++) {
+            String nazov = (String) modelShopBag.getValueAt(i, 0);
+            double price = (Double) modelShopBag.getValueAt(i, 3);
+            int IdProduct = report.getIDProduct(nazov);
+            int IdDiscout = report.getIdDiscout(code);
+            
+            if (per) {
+                {
+                    perDis = Report.getPerDis(user_id, code);
+                    
+                    price = price * ((100-perDis)/100);
+                    DataManager.insertProduct(IdProduct, IdDiscout, IdOrder, price);
+                    DataManager.updateDiscountToDeactive(IdDiscout,user_id);
+                }
+            } else {
+                cenDis = Report.getCenDis(user_id, code);
+                if (price > cenDis) {
+                    price = price - cenDis;
+                    DataManager.insertProduct(IdProduct, IdDiscout, IdOrder, price);
+                    DataManager.updateDiscountToDeactive(IdDiscout,user_id);
+                }  
+            }
+        }
+            
+            JOptionPane.showMessageDialog(null, "New Order was succesfully created", "Warning", JOptionPane.WARNING_MESSAGE);
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderNew.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        }else {
+         JOptionPane.showMessageDialog(null, "You dont have any product in shopping bag ", "Warning", JOptionPane.WARNING_MESSAGE);
+         }        
+        
     }//GEN-LAST:event_jButtonAllActionPerformed
 
     /**

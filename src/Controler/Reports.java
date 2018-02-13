@@ -151,9 +151,9 @@ public class Reports {
                 + " sum(cena*mnozstvo) as Price"
                 + " from Objednavka o"
                 + " join registrovany_uzivatel ru on(ru.id_uzivatela = o.kupujuci)"
-                + " join Polozka using (id_objednavky)"
+                + " left join Polozka using (id_objednavky)"
                 + " where ru.email like " + addApostrofs(Email)
-                + " and o.stav like 'N'"
+                + " and o.stav like 'S'"
                 + " group by id_objednavky, dat_objednavky, stav,o.kupujuci";
 
         List<AccountMyOrder> result = new ArrayList<>();
@@ -218,6 +218,83 @@ public class Reports {
                 rs.next();
                 //Retrieve by column name
                 result = rs.getDate("dat_objednavky");
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+     
+     public int getMaxIdOrder() {
+         int result = 0; 
+         String query = "SELECT"
+                + " max(id_objednavky) as max"
+                + " from Objednavka "
+            ;
+
+       ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                rs.next();
+                //Retrieve by column name
+                result = rs.getInt("max");
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+     
+     public int getIdDiscout(String code) {
+         int result = 0; 
+         String query = "SELECT"
+                + " id_zlavy as zlava"
+                + " from uzivatel_zlavy"
+                + " where kod_zlavy like" + addApostrofs(code)
+            ;
+
+       ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                rs.next();
+                //Retrieve by column name
+                result = rs.getInt("zlava");
+                rs.close();
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    public int getIDProduct(String nameOfProduct) {
+         int result = 0; 
+         String query = "SELECT"
+                + " id_predmetu as predmet"
+                + " from Predmet_predaja"
+                + " where nazov like" + addApostrofs(nameOfProduct)
+            ;
+
+       ResultSet rs = DbManager.querySQL(query);
+        try {
+            if (rs != null) {
+
+                rs.next();
+                //Retrieve by column name
+                result = rs.getInt("predmet");
                 rs.close();
 
             }

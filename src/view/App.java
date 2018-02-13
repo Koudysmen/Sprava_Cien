@@ -1293,8 +1293,11 @@ public class App extends javax.swing.JFrame {
                 for (AccountMyOrder myOrder : UserOrder) {
                     o[i][0] = myOrder.getIdCustOrder();
                     o[i][1] = Formater.format(myOrder.getDateOfOrder());
-                    if ("N".equals(myOrder.getState())) {
+                    if ("S".equals(myOrder.getState())) {
                         o[i][2] = "sended";
+                    }
+                    else {
+                        o[i][2] = "delivered";
                     }
                     o[i][3] = myOrder.getTotalPrice();
                     i++;
