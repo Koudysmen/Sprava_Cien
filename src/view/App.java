@@ -80,9 +80,9 @@ public class App extends javax.swing.JFrame {
         ShowAllOrder();
         showProduct();
         
-          totalPrice = getTotalPriceFromBag();
-                            jButtonShoppingBag.setText("Shopping bag:  "
-                                    + String.valueOf(totalPrice) + " €");
+//          totalPrice = getTotalPriceFromBag();
+//                            jButtonShoppingBag.setText("Shopping bag:  "
+//                                    + String.valueOf(totalPrice) + " €");
     }
 
     public App(DBManager dbManager) {
