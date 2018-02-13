@@ -529,7 +529,7 @@
                           <Component id="jLabel20" min="-2" pref="181" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                           <Component id="jLabelSetState1" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="1077" max="32767" attributes="0"/>
+                          <EmptySpace pref="1073" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1289,7 +1289,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel18" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jPanel19" pref="729" max="32767" attributes="0"/>
+                      <Component id="jPanel19" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

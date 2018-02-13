@@ -1552,20 +1552,19 @@ public class App extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton5ActionPerformed
 
-    public double getTotalPriceFromBag()
-   { double price = 0.0;
-     if(OrderItem.getRowCount()!=0){
-     for(int i=0; i<OrderItem.getRowCount();i++)
-      {
-      price += (double) OrderItem.getValueAt(i, 3);     
-      }
+    public double getTotalPriceFromBag(){ 
+       double price = 0.0;
+       if(OrderItem.getRowCount() > 0){
+            for(int i=0; i<OrderItem.getRowCount();i++){
+            price += (double) OrderItem.getValueAt(i, 3);     
+        }
      }
-     return price;
+         return price;
    }
     
     public Object getObject()
-    {
-    return o;
+        {
+        return o;
     }
     
     

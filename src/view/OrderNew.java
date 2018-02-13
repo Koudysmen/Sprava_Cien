@@ -21,6 +21,7 @@ import javax.swing.table.TableModel;
  * @author Michal
  */
 public class OrderNew extends javax.swing.JFrame {
+
     private static DBManager DbManager;
     private static TableModel tableModel;
     private DefaultTableModel modelShopBag;
@@ -28,7 +29,7 @@ public class OrderNew extends javax.swing.JFrame {
     private static UserCompany User;
     private Object[] o;
     private double totalPrice = 0.0;
-    
+
     /**
      * Creates new form OrderNew
      */
@@ -36,7 +37,9 @@ public class OrderNew extends javax.swing.JFrame {
         this.DbManager = dbManager;
         this.User = user;
         initComponents();
-        jlTotalPrice.setText(""+totalPrice);
+        jlTotalPrice.setText(totalPrice + " €");
+        jLabelFinalPrice.setText(totalPrice + " €");
+        jLabelDiscoutPricce.setText(0 + " €");
         this.Report = new Reports(dbManager);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         tableModel = jTableMyOrderItem.getModel();
@@ -64,13 +67,12 @@ public class OrderNew extends javax.swing.JFrame {
         jLabelFinalPrice = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
-        jLabelPrice = new javax.swing.JLabel();
+        jlTotalPrice = new javax.swing.JLabel();
         jLabelPrice2 = new javax.swing.JLabel();
         jLabelDiscoutPricce = new javax.swing.JLabel();
         jButtonShow = new javax.swing.JButton();
         jButtonShow1 = new javax.swing.JButton();
         jButtonAll = new javax.swing.JButton();
-        jlTotalPrice = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -89,7 +91,7 @@ public class OrderNew extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(500, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -116,7 +118,6 @@ public class OrderNew extends javax.swing.JFrame {
         jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
 
         jLabelFinalPrice.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
-        jLabelFinalPrice.setText("Final price: ");
 
         jLabel28.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
         jLabel28.setText("Final price: ");
@@ -145,14 +146,12 @@ public class OrderNew extends javax.swing.JFrame {
         jLabel26.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
         jLabel26.setText("Price:");
 
-        jLabelPrice.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
-        jLabelPrice.setText("Price:");
+        jlTotalPrice.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
 
         jLabelPrice2.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
         jLabelPrice2.setText("Discount price:");
 
         jLabelDiscoutPricce.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
-        jLabelDiscoutPricce.setText("Discount price:");
 
         jButtonShow.setBackground(new java.awt.Color(102, 102, 102));
         jButtonShow.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
@@ -181,14 +180,11 @@ public class OrderNew extends javax.swing.JFrame {
             }
         });
 
-        jlTotalPrice.setFont(new java.awt.Font("Tekton Pro", 0, 24)); // NOI18N
-        jlTotalPrice.setText("0.0");
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 709, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
@@ -196,19 +192,17 @@ public class OrderNew extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel26, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(63, 63, 63)
-                        .addComponent(jLabelPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jlTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(62, 62, 62)
-                        .addComponent(jLabelPrice2)
+                        .addComponent(jlTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(22, 22, 22))
+                        .addComponent(jLabelPrice2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jTextDicoutCode, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                         .addComponent(jButtonShow, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(45, 45, 45))))
             .addComponent(jButtonShow1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -233,10 +227,9 @@ public class OrderNew extends javax.swing.JFrame {
                 .addGap(61, 61, 61)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabelPrice)
-                    .addComponent(jLabelPrice2, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
-                    .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jlTotalPrice))
+                    .addComponent(jlTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelPrice2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabelDiscoutPricce, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(35, 35, 35)
@@ -279,70 +272,73 @@ public class OrderNew extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonShowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShowActionPerformed
-String code = jTextDicoutCode.getText().trim();
-String email = User.getEmailLog();
-int user_id = Report.getUserId(email);
-double perDis = 0.0;
-double cenDis = 0.0;
+        String code = jTextDicoutCode.getText().trim();
+        String email = User.getEmailLog();
+        int user_id = Report.getUserId(email);
+        double perDis = 0.0;
+        double cenDis = 0.0;
         try {
-   
-boolean per = Report.getPerCenDiscount(user_id, code);
-      
-           if(per)
-           {
-        {   perDis = Report.getPerDis(user_id, code);                     
-            System.out.println("percentualna "+perDis);
-        }         
-           }
-     else
-           {                         
-           cenDis = Report.getCenDis(user_id, code);
-           System.out.println("cenova "+cenDis);
-           if(totalPrice>cenDis)
-           {
-           totalPrice = totalPrice - cenDis;
-          jlTotalPrice.setText(""+totalPrice);
-           }
-           else
-           {
-            JOptionPane.showMessageDialog(null, "Minimum price must be higher than discount", "Warning", JOptionPane.WARNING_MESSAGE);           
-           }
-           }
+
+            boolean per = Report.getPerCenDiscount(user_id, code);
+
+            if (per) {
+                {
+                    double perValue = 0.0;
+                    perDis = Report.getPerDis(user_id, code);
+//                    System.out.println("percentualna " + perDis);
+                    
+                     perValue = totalPrice * (perDis/100);
+                     totalPrice = totalPrice - perValue;
+                     jLabelFinalPrice.setText(totalPrice + " €");
+                     jLabelDiscoutPricce.setText(perDis + " %");
+                }
+            } else {
+                cenDis = Report.getCenDis(user_id, code);
+//                System.out.println("cenova " + cenDis);
+                if (totalPrice > cenDis) {
+                    totalPrice = totalPrice - cenDis;
+                    jLabelFinalPrice.setText(totalPrice + " €");
+                    jLabelDiscoutPricce.setText(cenDis + " €");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Minimum price must be higher than discount", "Warning", JOptionPane.WARNING_MESSAGE);
+                }
+            }
         } catch (SQLException ex) {
             Logger.getLogger(OrderNew.class.getName()).log(Level.SEVERE, null, ex);
-        }  
- 
+        }
+
     }//GEN-LAST:event_jButtonShowActionPerformed
 
     private void jButtonShow1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShow1ActionPerformed
-      
-      int selectRow = jTableMyOrderItem.getSelectedRow();
-      modelShopBag.removeRow(selectRow);
-      
-      
-      setTotalPrice();      
-    
+     if (jTableMyOrderItem.getSelectedRow() != -1) {
+        int selectRow = jTableMyOrderItem.getSelectedRow();
+        modelShopBag.removeRow(selectRow);
+        
+        setTotalPrice();
+        } else {
+            JOptionPane.showMessageDialog(null, "Choose some product ", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+        
+
     }//GEN-LAST:event_jButtonShow1ActionPerformed
 
-    public void setTotalPrice()
-    {
-        double price= 0.0;
-      for(int i=0; i<modelShopBag.getRowCount();i++)
-      {
-      price += (double) modelShopBag.getValueAt(i, 3);     
-      }
-      totalPrice=price;
-      jlTotalPrice.setText(""+totalPrice);         
-      
+    public void setTotalPrice() {
+        double price = 0.0;
+        for (int i = 0; i < modelShopBag.getRowCount(); i++) {
+            price += (double) modelShopBag.getValueAt(i, 3);
+        }
+        totalPrice = price;
+        jlTotalPrice.setText(totalPrice + " €");
+        jLabelFinalPrice.setText(totalPrice + " €");
+
     }
-    
-    public double getTotalPrice()
-    {
-    return totalPrice;
+
+    public double getTotalPrice() {
+        return totalPrice;
     }
-    
+
     private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed
-       
+
     }//GEN-LAST:event_jButtonAllActionPerformed
 
     /**
@@ -376,16 +372,16 @@ boolean per = Report.getPerCenDiscount(user_id, code);
             }
         });
     }
-    */
-    public void setO(Object[] o)
-    {this.o = o;}
-    
-    public Object[] getO()
-    {
-    return o;
+     */
+    public void setO(Object[] o) {
+        this.o = o;
     }
-    
-               
+
+    public Object[] getO() {
+        return o;
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAll;
     private javax.swing.JButton jButtonShow;
@@ -396,7 +392,6 @@ boolean per = Report.getPerCenDiscount(user_id, code);
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabelDiscoutPricce;
     private javax.swing.JLabel jLabelFinalPrice;
-    private javax.swing.JLabel jLabelPrice;
     private javax.swing.JLabel jLabelPrice2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
